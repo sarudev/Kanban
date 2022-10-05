@@ -1,0 +1,63 @@
+.board {
+  max-width: 1200px;
+  display: inline-flex;
+}
+
+.board-section {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  border: 1px solid red;
+  overflow-x: hidden;
+}
+
+.note {
+  position: relative;
+  left: calc(50% - 100px);
+  width: 200px;
+  height: 50px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  /* cursor: grab; */
+  transition: border-color 0.25s;
+}
+
+/* .board>.board-section>.note:active {
+  cursor: grabbing;
+  border-color: magenta;
+  transition: border-color 0.25s;
+} */
+
+.board-section::-webkit-scrollbar {
+  display: none;
+}
+
+.no-select {
+  user-select: none;
+}
+
+/* width */
+/* .note::-webkit-scrollbar {
+  width: 10px;
+} */
+
+/* Track */
+/* .note::-webkit-scrollbar-track {
+  background: var(--bg-color);
+} */
+
+/* Handle */
+/* .note::-webkit-scrollbar-thumb {
+  background: #888;
+} */
+
+/* Handle on hover */
+/* .note::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} */
