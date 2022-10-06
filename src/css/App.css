@@ -73,7 +73,7 @@
 }
 
 .icon-animation {
-  animation: blink-2 5s infinite ease;
+  animation: blink-2 2.5s infinite ease-in-out;
 }
 
 @keyframes blink-2 {

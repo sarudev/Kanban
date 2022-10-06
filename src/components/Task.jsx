@@ -6,11 +6,11 @@ import 'boxicons'
 import '../css/App.css'
 
 const Container = styled.div`
-  border: 1px solid ${props => props.isDragging ? 'magenta' : 'lightgrey'};
-  border-radius: 5px;
+  outline: 1px solid var(${props => props.isDragging ? '--focus-outline' : '--outline'});
+  border-radius: 8px;
   padding: 8px;
   margin-bottom: 8px;
-  background-color: ${props => props.isDragDisabled ? 'black' : '#242424'};
+  background-color: var(--bg-color);
   user-select: text;
   display: flex;
 `

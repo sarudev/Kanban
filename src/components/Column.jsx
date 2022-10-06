@@ -19,7 +19,8 @@ const Title = styled.h3`
 const TaskList = styled.div`
   padding: 10px;
   transition: background-color 0.2s ease;
-  background-color: ${props => (props.isDraggingOver ? '#191919' : '#242424')};
+  background-color: var(--bg-color);
+  outline: 1px var(${props => (props.isDraggingOver ? '--focus-board-outline-color' : '--bg-color')}) solid;
   flex-grow: 1;
   margin: 10px;
   border-radius: 15px;
