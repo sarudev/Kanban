@@ -61,3 +61,31 @@
 /* .note::-webkit-scrollbar-thumb:hover {
   background: #555;
 } */
+
+.icon {
+  color: lightgrey;
+  font-size: 24px;
+}
+
+.icon::before {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-animation {
+  animation: blink-2 5s infinite ease;
+}
+
+@keyframes blink-2 {
+  40% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+
+  60% {
+    opacity: 1;
+  }
+}

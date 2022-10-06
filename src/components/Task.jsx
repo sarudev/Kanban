@@ -2,26 +2,46 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Draggable } from 'react-beautiful-dnd'
+import 'boxicons'
+import '../css/App.css'
 
 const Container = styled.div`
-  border: 1px solid ${(props) => props.isDragging ? 'magenta' : 'lightgrey'};
-  border-radius: 2px;
+  border: 1px solid ${props => props.isDragging ? 'magenta' : 'lightgrey'};
+  border-radius: 5px;
   padding: 8px;
   margin-bottom: 8px;
-  background-color: #242424;
+  background-color: ${props => props.isDragDisabled ? 'black' : '#242424'};
+  user-select: text;
+  display: flex;
+`
+const Icon = styled.div`
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  position: relative;
+  top: calc(50% - 12px);
 `
 
-export default function Task ({ task, index }) {
+export default function Task ({ task, index, isDragDisabled }) {
   return (
-    <Draggable draggableId={task.id} index={index}>
+    <Draggable
+      draggableId={task.id}
+      index={index}
+      isDragDisabled={isDragDisabled}
+    >
       {(provided, snapshot) => (
         <Container
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
           ref={provided.innerRef}
           isDragging={snapshot.isDragging}
+          isDragDisabled={isDragDisabled}
         >
-          {task.content}
+          <div {...provided.dragHandleProps}>
+            <Icon>
+              <i className='icon icon-animation bx bx-menu' />
+            </Icon>
+          </div>
+          <div style={{ marginLeft: '8px', userSelect: 'text', textAlign: 'initial' }}>{task.content}</div>
         </Container>
       )}
     </Draggable>
@@ -29,5 +49,6 @@ export default function Task ({ task, index }) {
 }
 Task.propTypes = {
   task: PropTypes.object,
-  index: PropTypes.number
+  index: PropTypes.number,
+  isDragDisabled: PropTypes.bool
 }
