@@ -38,13 +38,13 @@ function observer (entries, where) {
   if (entries[0].target.offsetParent == null) { return }
   entries[0].isIntersecting
     ? entries[0].target.offsetParent.style[where] = ''
-    : entries[0].target.offsetParent.style[where] = '2px magenta solid'
+    : entries[0].target.offsetParent.style[where] = '2px var(--focus-outline) solid'
 }
 
 export default function Column ({ columnId, title, tasks, isDragging }) {
   useEffect(() => {
     if (tasks.length > 0) {
-      ;[...document.getElementsByClassName('task')].forEach(el => {
+      ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
         observerTop.unobserve(el)
         observerDown.unobserve(el)
       })
@@ -58,7 +58,7 @@ export default function Column ({ columnId, title, tasks, isDragging }) {
   }
 
   return (
-    <Container>
+    <Container id={columnId}>
       <Title>{title}</Title>
       <Droppable droppableId={columnId}>
         {(provided, snapshot) => (
