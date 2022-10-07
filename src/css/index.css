@@ -3,7 +3,8 @@
   --focus-board-outline-color: #5cb8e4;
   --disabled-bg-color: #f2f2f21c;
   --text-color: #353535;
-  --disabled-text-color: #C1292E;
+  --warning: #d45e62a8;
+  --limit: #fbfff169;
   --outline: #FBFFF1;
   --focus-outline: #8758ff;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
