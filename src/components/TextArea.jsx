@@ -38,13 +38,18 @@ export default function TextArea ({ addTask }) {
       }
       addTask(textAreaRef.current.value)
       textAreaRef.current.value = ''
+      setLimiter()
     }
+  }
+
+  const setLimiter = () => {
+    setLimitCounter(textAreaRef.current.value.length)
   }
 
   return (
     <Container>
       <Counter counter={limitCounter}>{limitCounter}/200</Counter>
-      <Text ref={textAreaRef} maxLength={200} onKeyDown={keydown} placeholder='Enter task content here.&#10;Press enter to add.' onChange={() => setLimitCounter(textAreaRef.current.value.length)} />
+      <Text ref={textAreaRef} maxLength={200} onKeyDown={keydown} placeholder='Enter task content here.&#10;Press enter to add.' onChange={setLimiter} />
     </Container>
   )
 }
