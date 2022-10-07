@@ -24,7 +24,7 @@ const TextContent = styled.div`
   position: relative;
   width: ${props => props.icon ? 85 : 100}%;
   margin-left: ${props => props.icon ? 8 : 0}px;
-  user-select: text;
+  user-select: ${props => props.icon ? 'text' : 'none'};
   text-align: center;
   word-wrap: break-word;
 `
