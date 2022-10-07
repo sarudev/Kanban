@@ -35,6 +35,8 @@ export default function Task ({ task, index, isDragDisabled }) {
           ref={provided.innerRef}
           isDragging={snapshot.isDragging}
           isDragDisabled={isDragDisabled}
+          id={task.id}
+          className='task'
         >
           <div {...provided.dragHandleProps}>
             <Icon>

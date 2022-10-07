@@ -1,12 +1,19 @@
 import React, { useState } from 'react'
 import { DragDropContext } from 'react-beautiful-dnd'
-import style from 'styled-components'
+import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Column from './Column'
 
-const Container = style.div`
+const Container = styled.div`
   max-width: 1200px;
-  display: inline-flex;
+  display: flex;
+  flex-direction: row;
+`
+const UpDiv = styled.div`
+  max-width: 1200px;
+  height: 400px;
+  display: flex;
+  flex-direction: row;
 `
 
 export default function Board ({ initialData }) {
@@ -82,13 +89,15 @@ export default function Board ({ initialData }) {
         onDragStart={(result) => onDragStart(result)}
         onDragEnd={result => handleOnDragEnd(result)}
       >
-        {Object.values(state.columns).map((c, i) => (
-          <Column key={i} className='board-section' id={c.id} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} />
-        ))}
+        <UpDiv>
+          {Object.values(state.columns).map((c, i) => (
+            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} />
+          ))}
+        </UpDiv>
       </DragDropContext>
     </Container>
   )
 }
 Board.propTypes = {
-  initialData: PropTypes.object
+  initialData: PropTypes.object.isRequired
 }

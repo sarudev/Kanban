@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Task from './Task'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
@@ -9,6 +9,7 @@ const Container = styled.div`
   border: 1px solid lightgrey;
   border-radius: 10px;
   width: 285px;
+  height: 500px;
 
   display: flex;
   flex-direction: column;
@@ -21,13 +22,41 @@ const TaskList = styled.div`
   transition: background-color 0.2s ease;
   background-color: var(--bg-color);
   outline: 1px var(${props => (props.isDraggingOver ? '--focus-board-outline-color' : '--bg-color')}) solid;
-  flex-grow: 1;
   margin: 10px;
   border-radius: 15px;
-  min-height: 700px;
+  height: 100%;
+  overflow-x: hidden;
+  position: relative;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `
 
-export default function Column ({ className, id, columnId, title, tasks, isDragging }) {
+const observerTop = new window.IntersectionObserver(e => observer(e, 'borderTop'), { threshold: [1] })
+const observerDown = new window.IntersectionObserver(e => observer(e, 'borderBottom'), { threshold: [1] })
+function observer (entries, where) {
+  if (entries[0].target.offsetParent == null) { return }
+  entries[0].isIntersecting
+    ? entries[0].target.offsetParent.style[where] = ''
+    : entries[0].target.offsetParent.style[where] = '2px magenta solid'
+}
+
+export default function Column ({ columnId, title, tasks, isDragging }) {
+  useEffect(() => {
+    if (tasks.length > 0) {
+      ;[...document.getElementsByClassName('task')].forEach(el => {
+        observerTop.unobserve(el)
+        observerDown.unobserve(el)
+      })
+
+      observerTop.observe(document.getElementById(tasks[0].id))
+      observerDown.observe(document.getElementById(tasks.at(-1).id))
+    }
+  })
+
+  const handleScroll = () => {
+  }
+
   return (
     <Container>
       <Title>{title}</Title>
@@ -37,6 +66,7 @@ export default function Column ({ className, id, columnId, title, tasks, isDragg
             {...provided.droppableProps}
             ref={provided.innerRef}
             isDraggingOver={snapshot.isDraggingOver}
+            onScroll={handleScroll}
           >
             {tasks.map((task, index) => (
               <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} />
@@ -50,9 +80,7 @@ export default function Column ({ className, id, columnId, title, tasks, isDragg
 }
 
 Column.propTypes = {
-  className: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
   columnId: PropTypes.string.isRequired,
   tasks: PropTypes.array.isRequired,
   isDragging: PropTypes.bool.isRequired
