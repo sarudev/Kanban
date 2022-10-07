@@ -30,65 +30,87 @@ const DownDiv = styled.div`
   outline: 1px var(--outline) solid;
 `
 
-export default function Board ({ initialData }) {
-  const [state, setState] = useState(initialData)
+export default function Board ({ initialColumns }) {
+  const [tasks, setTasks] = useState({})
+  const [columns, setColumns] = useState(initialColumns)
   const [dragging, setDragging] = useState(false)
 
-  function handleOnDragEnd ({ destination, draggableId, source }) {
+  const addTask = (taskContent) => {
+    const lastTaskId = +tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1
+    const newTask = {
+      id: `task-${lastTaskId}`,
+      content: taskContent
+    }
+
+    const newTasksState = {
+      ...tasks,
+      [newTask.id]: newTask
+    }
+
+    setTasks(newTasksState)
+
+    const newColumnsState = {
+      ...columns,
+      'column-1': {
+        ...columns['column-1'],
+        taskIds: [...columns['column-1'].taskIds, newTask.id]
+      }
+    }
+
+    setColumns(newColumnsState)
+  }
+
+  const handleOnDragEnd = ({ destination, draggableId, source }) => {
     setDragging(false)
     ;[...document.querySelectorAll('.bx-menu')].forEach(e => e.classList.toggle('icon-animation'))
+
     if (!destination) { return }
 
     if (destination.droppableId === source.droppableId && destination.index === source.index) { return }
 
-    const startColumn = state.columns[source.droppableId]
-    const finishColumn = state.columns[destination.droppableId]
+    const sourceColumn = columns[source.droppableId]
+    const destinationColumn = columns[destination.droppableId]
 
-    if (startColumn === finishColumn) {
-      const newTaskIds = Array.from(startColumn.taskIds)
+    if (sourceColumn === destinationColumn) {
+      const newTaskIds = Array.from(sourceColumn.taskIds)
       newTaskIds.splice(source.index, 1)
       newTaskIds.splice(destination.index, 0, draggableId)
 
       const newColumn = {
-        ...startColumn,
+        ...sourceColumn,
         taskIds: newTaskIds
       }
 
-      const newState = {
-        ...state,
-        columns: {
-          ...state.columns,
-          [newColumn.id]: newColumn
-        }
+      const newColumnsState = {
+        ...columns,
+        [newColumn.id]: newColumn
       }
 
-      setState(newState)
+      setColumns(newColumnsState)
     } else {
-      const startTaskIds = Array.from(startColumn.taskIds)
-      startTaskIds.splice(source.index, 1)
-      const newStart = {
-        ...startColumn,
-        taskIds: startTaskIds
+      const sourceTaskIds = Array.from(sourceColumn.taskIds)
+      sourceTaskIds.splice(source.index, 1)
+
+      const newSource = {
+        ...sourceColumn,
+        taskIds: sourceTaskIds
       }
 
-      const finishTaskIds = Array.from(finishColumn.taskIds)
-      finishTaskIds.splice(destination.index, 0, draggableId)
+      const destinationTaskIds = Array.from(destinationColumn.taskIds)
+      destinationTaskIds.splice(destination.index, 0, draggableId)
 
-      const newFinish = {
-        ...finishColumn,
-        taskIds: finishTaskIds
+      const newDestination = {
+        ...destinationColumn,
+        taskIds: destinationTaskIds
       }
 
-      const newState = {
-        ...state,
-        columns: {
-          ...state.columns,
-          [newStart.id]: newStart,
-          [newFinish.id]: newFinish
-        }
+      const newColumnsState = {
+        ...columns,
+        [newSource.id]: newSource,
+        [newDestination.id]: newDestination
       }
 
-      setState(newState)
+      setColumns(newColumnsState)
     }
   }
 
@@ -104,17 +126,17 @@ export default function Board ({ initialData }) {
         onDragEnd={result => handleOnDragEnd(result)}
       >
         <UpDiv>
-          {Object.values(state.columns).map((c, i) => (
-            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} />
+          {Object.values(columns).map((c, i) => (
+            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => tasks[id])} isDragging={dragging} />
           ))}
         </UpDiv>
         <DownDiv>
-          <TextArea />
+          <TextArea addTask={addTask} />
         </DownDiv>
       </DragDropContext>
     </Container>
   )
 }
 Board.propTypes = {
-  initialData: PropTypes.object.isRequired
+  initialColumns: PropTypes.object.isRequired
 }

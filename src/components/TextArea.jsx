@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 const Container = styled.div`
@@ -15,34 +16,23 @@ const Text = styled.textarea`
   font-size: 19px;
 `
 
-export default function TextArea () {
+export default function TextArea ({ addTask }) {
   const textAreaRef = useRef()
-  const controlRef = useRef(false)
 
   const keydown = e => {
-    if (e.key === 'Control') {
-      e.preventDefault()
-      controlRef.current = true
-    }
     if (e.key === 'Enter') {
       e.preventDefault()
-      if (controlRef.current) {
-        console.log('send!')
-        textAreaRef.current.value = ''
-      }
-    }
-  }
-
-  const keyup = e => {
-    if (e.key === 'Control') {
-      e.preventDefault()
-      controlRef.current = false
+      addTask(textAreaRef.current.value)
+      textAreaRef.current.value = ''
     }
   }
 
   return (
     <Container>
-      <Text ref={textAreaRef} maxLength={200} onKeyDown={keydown} onKeyUp={keyup} placeholder='Enter task text here...' />
+      <Text ref={textAreaRef} maxLength={200} onKeyDown={keydown} placeholder='Enter task content here.&#10;Press enter to add.' />
     </Container>
   )
+}
+TextArea.propTypes = {
+  addTask: PropTypes.func.isRequired
 }
