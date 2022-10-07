@@ -7,15 +7,6 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
 `
-const Text = styled.textarea` 
-  width: 100%;
-  height: 100%;
-  resize: none;
-  border-radius: 8px;
-  padding: 8px;
-  text-align: center;
-  font-size: 19px;
-`
 const Counter = styled.div`
   width: 7ch;
   position: absolute;
@@ -24,6 +15,21 @@ const Counter = styled.div`
   font-size: 15px;
   color: var(${props => props.counter === 200 ? '--warning' : '--limit'});
   text-align: end;
+`
+const Text = styled.textarea` 
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  font-size: 19px;
+  background-color: var(--bg-color);
+  transition: background-color 0.25s ease;
+  &:focus {
+    background-color: var(--disabled-bg-color);
+    transition: background-color 0.25s ease;
+  }
 `
 
 export default function TextArea ({ addTask }) {
