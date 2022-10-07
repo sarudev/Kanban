@@ -33,6 +33,9 @@ export default function TextArea ({ addTask }) {
   const keydown = e => {
     if (e.key === 'Enter') {
       e.preventDefault()
+      if (textAreaRef.current.value.length < 1) {
+        return
+      }
       addTask(textAreaRef.current.value)
       textAreaRef.current.value = ''
     }
