@@ -35,13 +35,15 @@ const TaskList = styled.div`
 const observerTop = new window.IntersectionObserver(e => observer(e, 'borderTop'), { threshold: [1] })
 const observerDown = new window.IntersectionObserver(e => observer(e, 'borderBottom'), { threshold: [1] })
 function observer (entries, where) {
-  if (entries[0].target.offsetParent == null) { return }
+  if (entries[0].target.offsetParent == null) {
+    return
+  }
   entries[0].isIntersecting
     ? entries[0].target.offsetParent.style[where] = ''
     : entries[0].target.offsetParent.style[where] = '2px var(--focus-outline) solid'
 }
 
-export default function Column ({ columnId, title, tasks, isDragging }) {
+export default function Column ({ columnId, title, tasks, isDragging, showIcon }) {
   useEffect(() => {
     if (tasks.length > 0) {
       ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
@@ -69,7 +71,7 @@ export default function Column ({ columnId, title, tasks, isDragging }) {
             onScroll={handleScroll}
           >
             {tasks.map((task, index) => (
-              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} />
+              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} showIcon={showIcon} />
             ))}
             {provided.placeholder}
           </TaskList>
@@ -83,5 +85,6 @@ Column.propTypes = {
   title: PropTypes.string.isRequired,
   columnId: PropTypes.string.isRequired,
   tasks: PropTypes.array.isRequired,
-  isDragging: PropTypes.bool.isRequired
+  isDragging: PropTypes.bool.isRequired,
+  showIcon: PropTypes.bool.isRequired
 }

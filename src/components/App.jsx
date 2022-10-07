@@ -3,7 +3,7 @@ import Board from './Board'
 
 const initialData = {
   tasks: {
-    'task-1': { id: 'task-1', content: 'A' },
+    'task-1': { id: 'task-1', content: 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW' },
     'task-2': { id: 'task-2', content: 'B' },
     'task-3': { id: 'task-3', content: 'C' },
     'task-4': { id: 'task-4', content: 'D' },

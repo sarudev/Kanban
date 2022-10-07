@@ -5,7 +5,9 @@ import PropTypes from 'prop-types'
 import Column from './Column'
 
 const Container = styled.div`
+  position: relative;
   max-width: 1200px;
+  height: 500px;
   display: flex;
   flex-direction: row;
 `
@@ -19,6 +21,7 @@ const UpDiv = styled.div`
 export default function Board ({ initialData }) {
   const [state, setState] = useState(initialData)
   const [dragging, setDragging] = useState(false)
+  const [showIcon, setShowIcon] = useState(false)
 
   function handleOnDragEnd ({ destination, draggableId, source }) {
     setDragging(false)
@@ -91,9 +94,10 @@ export default function Board ({ initialData }) {
       >
         <UpDiv>
           {Object.values(state.columns).map((c, i) => (
-            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} />
+            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} showIcon={showIcon} />
           ))}
         </UpDiv>
+        <button style={{ height: '100%', margin: 8 }} onClick={() => setShowIcon(prev => !prev)}>Activate handle</button>
       </DragDropContext>
     </Container>
   )
