@@ -1,11 +1,11 @@
 :root {
-  --bg-color: rgb(24, 24, 24);
-  --focus-board-outline-color: rgb(92, 184, 228);
-  --disabled-bg-color: rgba(242, 242, 242, 0.11);
-  --text-color: rgb(53, 53, 53);
-  --disabled-text-color: rgb(255, 255, 255);
-  --outline: rgb(242, 242, 242);
-  --focus-outline: rgb(135, 88, 255);
+  --bg-color: #181818;
+  --focus-board-outline-color: #5cb8e4;
+  --disabled-bg-color: #f2f2f21c;
+  --text-color: #353535;
+  --disabled-text-color: #C1292E;
+  --outline: #FBFFF1;
+  --focus-outline: #8758ff;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -30,9 +30,6 @@
 }
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -50,8 +47,6 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {

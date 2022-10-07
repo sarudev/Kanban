@@ -6,11 +6,10 @@ import { Droppable } from 'react-beautiful-dnd'
 
 const Container = styled.div`
   margin: 8px;
-  border: 1px solid lightgrey;
+  outline: 1px solid lightgrey;
   border-radius: 10px;
-  width: 285px;
-  height: 500px;
-
+  width: 284px;
+  height: 484px;
   display: flex;
   flex-direction: column;
 `
@@ -43,7 +42,7 @@ function observer (entries, where) {
     : entries[0].target.offsetParent.style[where] = '2px var(--focus-outline) solid'
 }
 
-export default function Column ({ columnId, title, tasks, isDragging, showIcon }) {
+export default function Column ({ columnId, title, tasks, isDragging }) {
   useEffect(() => {
     if (tasks.length > 0) {
       ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
@@ -56,9 +55,6 @@ export default function Column ({ columnId, title, tasks, isDragging, showIcon }
     }
   })
 
-  const handleScroll = () => {
-  }
-
   return (
     <Container id={columnId}>
       <Title>{title}</Title>
@@ -68,10 +64,9 @@ export default function Column ({ columnId, title, tasks, isDragging, showIcon }
             {...provided.droppableProps}
             ref={provided.innerRef}
             isDraggingOver={snapshot.isDraggingOver}
-            onScroll={handleScroll}
           >
             {tasks.map((task, index) => (
-              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} showIcon={showIcon} />
+              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} />
             ))}
             {provided.placeholder}
           </TaskList>
@@ -85,6 +80,5 @@ Column.propTypes = {
   title: PropTypes.string.isRequired,
   columnId: PropTypes.string.isRequired,
   tasks: PropTypes.array.isRequired,
-  isDragging: PropTypes.bool.isRequired,
-  showIcon: PropTypes.bool.isRequired
+  isDragging: PropTypes.bool.isRequired
 }

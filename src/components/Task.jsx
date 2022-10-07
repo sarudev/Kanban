@@ -13,31 +13,14 @@ const Container = styled.div`
   background-color: var(--bg-color);
   display: flex;
 `
-const Icon = styled.div`
-  position: relative;
-  width: 24px;
-  height: 24px;
-  text-align: center;
-  top: calc(50% - 12px);
-`
 const TextContent = styled.div`
   position: relative;
   width: ${props => props.icon ? 85 : 100}%;
-  margin-left: ${props => props.icon ? 8 : 0}px;
-  user-select: ${props => props.icon ? 'text' : 'none'};
   text-align: center;
   word-wrap: break-word;
 `
 
-export default function Task ({ task, index, isDragDisabled, showIcon }) {
-  const icon = (provided) => (
-    <div {...(showIcon ? provided.dragHandleProps : null)}>
-      <Icon>
-        <i className='icon icon-animation bx bx-menu' />
-      </Icon>
-    </div>
-  )
-
+export default function Task ({ task, index, isDragDisabled }) {
   return (
     <Draggable
       draggableId={task.id}
@@ -47,15 +30,14 @@ export default function Task ({ task, index, isDragDisabled, showIcon }) {
       {(provided, snapshot) => (
         <Container
           {...provided.draggableProps}
-          {...(showIcon ? null : provided.dragHandleProps)}
+          {...provided.dragHandleProps}
           ref={provided.innerRef}
           isDragging={snapshot.isDragging}
           isDragDisabled={isDragDisabled}
           id={task.id}
           className='task'
         >
-          {showIcon && icon(provided)}
-          <TextContent icon={showIcon}>
+          <TextContent>
             {task.content}
           </TextContent>
         </Container>
@@ -66,6 +48,5 @@ export default function Task ({ task, index, isDragDisabled, showIcon }) {
 Task.propTypes = {
   task: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  isDragDisabled: PropTypes.bool.isRequired,
-  showIcon: PropTypes.bool.isRequired
+  isDragDisabled: PropTypes.bool.isRequired
 }

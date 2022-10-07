@@ -3,25 +3,36 @@ import { DragDropContext } from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import Column from './Column'
+import TextArea from './TextArea'
 
 const Container = styled.div`
   position: relative;
   max-width: 1200px;
-  height: 500px;
+  min-height: 500px;
+  max-height: 608px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 `
 const UpDiv = styled.div`
   max-width: 1200px;
-  height: 400px;
   display: flex;
   flex-direction: row;
+`
+const DownDiv = styled.div`
+  max-width: 1200px;
+  display: flex;
+  flex-direction: row;
+  height: 100px;
+  background-color: var(--bg-color);
+  margin: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  outline: 1px var(--outline) solid;
 `
 
 export default function Board ({ initialData }) {
   const [state, setState] = useState(initialData)
   const [dragging, setDragging] = useState(false)
-  const [showIcon, setShowIcon] = useState(false)
 
   function handleOnDragEnd ({ destination, draggableId, source }) {
     setDragging(false)
@@ -94,10 +105,12 @@ export default function Board ({ initialData }) {
       >
         <UpDiv>
           {Object.values(state.columns).map((c, i) => (
-            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} showIcon={showIcon} />
+            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => state.tasks[id])} isDragging={dragging} />
           ))}
         </UpDiv>
-        <button style={{ height: '100%', margin: 8 }} onClick={() => setShowIcon(prev => !prev)}>Activate handle</button>
+        <DownDiv>
+          <TextArea />
+        </DownDiv>
       </DragDropContext>
     </Container>
   )

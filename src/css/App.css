@@ -72,7 +72,7 @@
   height: 24px;
 }
 
-.icon-animation {
+.animation {
   animation: blink-2 2.5s infinite ease-in-out;
 }
 
