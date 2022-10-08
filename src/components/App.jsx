@@ -1,5 +1,6 @@
 import React from 'react'
 import Board from './Board'
+import styled from 'styled-components'
 
 const columns = {
   'column-1': {
@@ -24,9 +25,22 @@ const columns = {
   }
 }
 
+const ContextMenu = styled.div`
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: red;
+  z-index: 10;
+`
+
 function App () {
   return (
-    <Board initialColumns={columns} />
+    <>
+      <ContextMenu id='context-menu' hidden>
+        a
+      </ContextMenu>
+      <Board initialColumns={columns} />
+    </>
   )
 }
 

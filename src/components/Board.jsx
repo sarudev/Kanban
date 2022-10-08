@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DragDropContext } from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
@@ -30,10 +30,40 @@ const DownDiv = styled.div`
   outline: 1px var(--outline) solid;
 `
 
-export default function Board ({ initialColumns }) {
+export default function Board ({ initialColumns, handleContextMenu }) {
   const [tasks, setTasks] = useState({})
   const [columns, setColumns] = useState(initialColumns)
   const [dragging, setDragging] = useState(false)
+
+  useEffect(() => {
+    const clickFunc = e => {
+      const contextMenu = document.getElementById('context-menu')
+      const textArea = document.getElementById('task-creator')
+      const tasksIds = [...document.getElementsByClassName('task')].map(e => e.id)
+
+      if (e.touches) {
+        if (e.target.id !== textArea.id) { textArea.blur() } else { return }
+        e.preventDefault()
+        document.removeEventListener('touchend', clickFunc)
+        document.addEventListener('mousedown', clickFunc)
+      }
+      if (e.target.id !== contextMenu.id && !tasksIds.includes(e.target.id || e.target.offsetParent?.id)) {
+        contextMenu.hidden = true
+      }
+    }
+    const touchFunc = e => {
+      document.removeEventListener('mousedown', clickFunc)
+      document.addEventListener('touchend', clickFunc)
+    }
+
+    document.addEventListener('mousedown', clickFunc)
+    document.addEventListener('touchstart', touchFunc)
+    return () => {
+      document.removeEventListener('mousedown', clickFunc)
+      document.removeEventListener('touchstart', touchFunc)
+      document.removeEventListener('touchend', clickFunc)
+    }
+  }, [])
 
   const addTask = (taskContent) => {
     const lastTaskId = +tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1
@@ -127,7 +157,7 @@ export default function Board ({ initialColumns }) {
       >
         <UpDiv>
           {Object.values(columns).map((c, i) => (
-            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => tasks[id])} isDragging={dragging} />
+            <Column key={i} columnId={c.id} title={c.title} tasks={c.taskIds.map(id => tasks[id])} isDragging={dragging} handleContextMenu={handleContextMenu} />
           ))}
         </UpDiv>
         <DownDiv>
@@ -138,5 +168,6 @@ export default function Board ({ initialColumns }) {
   )
 }
 Board.propTypes = {
-  initialColumns: PropTypes.object.isRequired
+  initialColumns: PropTypes.object.isRequired,
+  handleContextMenu: PropTypes.func
 }

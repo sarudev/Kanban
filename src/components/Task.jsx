@@ -15,12 +15,30 @@ const Container = styled.div`
 `
 const TextContent = styled.div`
   position: relative;
-  width: ${props => props.icon ? 85 : 100}%;
+  width: 100%;
+  margin-left: 0px;
   text-align: center;
   word-wrap: break-word;
 `
 
-export default function Task ({ task, index, isDragDisabled }) {
+export default function Task ({ task, index, isDragDisabled, handleContextMenu }) {
+  let moved = false
+
+  const onAuxClick = e => {
+    e.preventDefault()
+    document.getElementById('context-menu').hidden = false
+  }
+
+  const onContextMenu = e => e.preventDefault()
+
+  const onTouchEnd = () => {
+    moved
+      ? moved = false
+      : document.getElementById('context-menu').hidden = false
+  }
+
+  const onTouchMove = () => { moved = true }
+
   return (
     <Draggable
       draggableId={task.id}
@@ -36,6 +54,10 @@ export default function Task ({ task, index, isDragDisabled }) {
           isDragDisabled={isDragDisabled}
           id={task.id}
           className='task'
+          onAuxClick={onAuxClick}
+          onContextMenu={onContextMenu}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           <TextContent>
             {task.content}
@@ -48,5 +70,6 @@ export default function Task ({ task, index, isDragDisabled }) {
 Task.propTypes = {
   task: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  isDragDisabled: PropTypes.bool.isRequired
+  isDragDisabled: PropTypes.bool.isRequired,
+  handleContextMenu: PropTypes.func
 }

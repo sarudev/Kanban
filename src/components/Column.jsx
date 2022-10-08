@@ -10,6 +10,7 @@ const Container = styled.div`
   border-radius: 10px;
   width: 284px;
   height: 484px;
+  background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
 `
@@ -18,8 +19,8 @@ const Title = styled.h3`
 `
 const TaskList = styled.div`
   padding: 10px;
-  transition: background-color 0.2s ease;
-  background-color: var(--bg-color);
+  transition: background-color 0.2s ease, outline .2s ease;
+  background-color: var(${props => props.isDraggingOver ? '--disabled-bg-color' : '--bg-color'});
   outline: 1px var(${props => (props.isDraggingOver ? '--focus-board-outline-color' : '--bg-color')}) solid;
   margin: 10px;
   border-radius: 15px;
@@ -42,7 +43,7 @@ function observer (entries, where) {
     : entries[0].target.offsetParent.style[where] = '2px var(--focus-outline) solid'
 }
 
-export default function Column ({ columnId, title, tasks, isDragging }) {
+export default function Column ({ columnId, title, tasks, isDragging, handleContextMenu }) {
   useEffect(() => {
     if (tasks.length > 0) {
       ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
@@ -66,7 +67,7 @@ export default function Column ({ columnId, title, tasks, isDragging }) {
             isDraggingOver={snapshot.isDraggingOver}
           >
             {tasks.map((task, index) => (
-              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} />
+              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} handleContextMenu={handleContextMenu} />
             ))}
             {provided.placeholder}
           </TaskList>
@@ -80,5 +81,6 @@ Column.propTypes = {
   title: PropTypes.string.isRequired,
   columnId: PropTypes.string.isRequired,
   tasks: PropTypes.array.isRequired,
-  isDragging: PropTypes.bool.isRequired
+  isDragging: PropTypes.bool.isRequired,
+  handleContextMenu: PropTypes.func
 }
