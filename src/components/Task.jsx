@@ -26,18 +26,28 @@ export default function Task ({ task, index, isDragDisabled, handleContextMenu }
 
   const onAuxClick = e => {
     e.preventDefault()
-    document.getElementById('context-menu').hidden = false
+    const contextMenu = document.getElementById('context-menu')
+    contextMenu.hidden = false
+    contextMenu.style.top = `${e.clientY}px`
+    contextMenu.style.left = `${e.clientX}px`
   }
 
   const onContextMenu = e => e.preventDefault()
+
+  const onTouchStart = e => {
+    const contextMenu = document.getElementById('context-menu')
+
+    contextMenu.style.top = `${e.touches[0].clientY}px`
+    contextMenu.style.left = `${e.touches[0].clientX}px`
+  }
+
+  const onTouchMove = () => { moved = true }
 
   const onTouchEnd = () => {
     moved
       ? moved = false
       : document.getElementById('context-menu').hidden = false
   }
-
-  const onTouchMove = () => { moved = true }
 
   return (
     <Draggable
@@ -56,6 +66,7 @@ export default function Task ({ task, index, isDragDisabled, handleContextMenu }
           className='task'
           onAuxClick={onAuxClick}
           onContextMenu={onContextMenu}
+          onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >

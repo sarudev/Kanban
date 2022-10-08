@@ -36,7 +36,7 @@ const ContextMenu = styled.div`
 function App () {
   return (
     <>
-      <ContextMenu id='context-menu' hidden>
+      <ContextMenu onContextMenu={e => e.preventDefault()} id='context-menu' hidden>
         a
       </ContextMenu>
       <Board initialColumns={columns} />
