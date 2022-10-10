@@ -9,6 +9,7 @@ export const tasksSlice = createSlice({
     addTask: (state, { payload }) => {
       state[payload.id] = payload
     },
+    addTasks: (state, { payload }) => ({ ...state, ...payload }),
     removeTask: (state, { payload }) => {
       delete state[payload]
     }

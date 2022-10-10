@@ -27,10 +27,9 @@ export const columnsSlice = createSlice({
   name: 'columns',
   initialState,
   reducers: {
-    addTaskIdInColumn: (state, { payload }) => {
-      const { id, taskId } = payload
-      if (!state[id].taskIds.includes(taskId)) {
-        state[id].taskIds.push(taskId)
+    addTaskId: (state, { payload }) => {
+      if (!state['column-1'].taskIds.includes(payload)) {
+        state['column-1'].taskIds.push(payload)
       }
     },
     moveTaskId: (state, { payload }) => {
@@ -39,11 +38,16 @@ export const columnsSlice = createSlice({
       state[columns.to].taskIds.splice(index.to, 0, taskId)
     },
     removeTaskId: (state, { payload }) => {
-      state[payload.columnId].taskIds = state[payload.columnId].taskIds.filter(t => t !== payload.taskId)
+      for (const columnId in state) {
+        if (state[columnId].taskIds.includes(payload)) {
+          state[columnId].taskIds = state[columnId].taskIds.filter(t => t !== payload)
+          break
+        }
+      }
     }
   }
 })
 
-export const { addTaskIdInColumn, moveTaskId, removeTaskId } = columnsSlice.actions
+export const { addTaskId, moveTaskId, removeTaskId } = columnsSlice.actions
 
 export default columnsSlice.reducer

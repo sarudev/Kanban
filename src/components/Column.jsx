@@ -3,8 +3,7 @@ import Task from './Task'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Droppable } from 'react-beautiful-dnd'
-import { useSelector, useDispatch } from 'react-redux'
-import { setContextMenuId } from '../redux/reducers/contextMenuId'
+import { useSelector } from 'react-redux'
 
 const Container = styled.div`
   margin: 8px;
@@ -47,11 +46,10 @@ function observer (entries, where) {
 
 export default function Column ({ columnId, title, tasks }) {
   const isDragging = useSelector(state => state.isDragging)
-  const dispatch = useDispatch()
 
   useEffect(() => {
     if (tasks.length > 0) {
-      ;[...document.getElementById('container-' + columnId).childNodes[1].childNodes].forEach(el => {
+      ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
         observerTop.unobserve(el)
         observerDown.unobserve(el)
       })
@@ -60,55 +58,17 @@ export default function Column ({ columnId, title, tasks }) {
       observerDown.observe(document.getElementById(tasks.at(-1).id))
     }
   })
-  let moved = false
-
-  const handleOnAuxClick = e => {
-    e.preventDefault()
-    if (e.target.id.startsWith('task-')) {
-      return
-    }
-    dispatch(setContextMenuId({ columnId, taskId: '' }))
-
-    const contextMenu = document.getElementById('context-menu')
-
-    contextMenu.style.display = 'flex'
-    contextMenu.style.top = `${e.clientY}px`
-    contextMenu.style.left = `${e.clientX}px`
-  }
-
-  const handleOnTouchStart = e => {
-    const contextMenu = document.getElementById('context-menu')
-
-    contextMenu.style.display = 'none'
-    contextMenu.style.top = `${e.touches[0].clientY}px`
-    contextMenu.style.left = `${e.touches[0].clientX}px`
-  }
-
-  const handleOnTouchEnd = e => {
-    if (moved) {
-      moved = false
-    } else if (e.target.classList.contains('column')) {
-      document.getElementById('context-menu').style.display = 'flex'
-      dispatch(setContextMenuId({ columnId, taskId: '' }))
-    }
-  }
 
   return (
-    <Container id={'container-' + columnId}>
+    <Container id={columnId}>
       <Title>{title}</Title>
       <Droppable droppableId={columnId}>
         {(provided, snapshot) => (
           <TaskList
             {...provided.droppableProps}
             className='column'
-            id={columnId}
             ref={provided.innerRef}
             isDraggingOver={snapshot.isDraggingOver}
-            onAuxClick={handleOnAuxClick}
-            onContextMenu={e => e.preventDefault()}
-            onTouchStart={handleOnTouchStart}
-            onTouchMove={() => { moved = true }}
-            onTouchEnd={handleOnTouchEnd}
           >
             {tasks.map((task, index) => (
               <Task

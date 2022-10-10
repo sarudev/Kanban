@@ -1,12 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {
-  columnId: '',
-  taskId: ''
-}
+const initialState = ''
 
 export const taskIdContextMenuSlice = createSlice({
-  name: 'taskIdContextMenu',
+  name: 'contextMenuId',
   initialState,
   reducers: {
     setContextMenuId: (state, { payload }) => payload

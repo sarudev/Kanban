@@ -24,7 +24,7 @@ export default function Task ({ task, index, isDragDisabled }) {
   const onAuxClick = e => {
     e.preventDefault()
     console.log(task.id)
-    dispatch(setContextMenuId({ columnId: e.target.offsetParent.id, taskId: task.id }))
+    dispatch(setContextMenuId(task.id))
 
     const contextMenu = document.getElementById('context-menu')
 

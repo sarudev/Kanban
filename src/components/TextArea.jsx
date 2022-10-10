@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { addTask } from '../redux/reducers/tasksSlice'
-import { addTaskIdInColumn } from '../redux/reducers/columnsSlice'
+import { addTaskId } from '../redux/reducers/columnsSlice'
 
 const Container = styled.div`
   position: relative;
@@ -52,7 +52,7 @@ export default function TextArea () {
 
       const taskId = 'task-' + (+tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1)
       dispatch(addTask({ id: taskId, content: textAreaRef.current.value }))
-      dispatch(addTaskIdInColumn({ id: 'column-1', taskId }))
+      dispatch(addTaskId(taskId))
       textAreaRef.current.value = ''
       setLimitCounter(textAreaRef.current.value.length)
     }

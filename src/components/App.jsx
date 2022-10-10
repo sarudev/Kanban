@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { useSelector, useDispatch } from 'react-redux'
 import { setContextMenuId } from '../redux/reducers/contextMenuId'
 import { addTask, removeTask } from '../redux/reducers/tasksSlice'
-import { addTaskIdInColumn, removeTaskId } from '../redux/reducers/columnsSlice'
+import { addTaskId, removeTaskId } from '../redux/reducers/columnsSlice'
 
 const AppContainer = styled.div`
   min-width: 100vw;
@@ -45,7 +45,8 @@ function App () {
   const tasks = useSelector(state => state.tasks)
   const contextMenuId = useSelector(state => state.contextMenuId)
   const dispatch = useDispatch()
-  let control = useRef(false)
+  const control = useRef(false)
+  const moved = useRef(false)
 
   const addTaskFunc = async () => {
     const data = await navigator.clipboard.readText()
@@ -55,7 +56,7 @@ function App () {
 
     const taskId = 'task-' + (+Object.keys(tasks).at(-1)?.split('-')?.[1] + 1 || 1)
     dispatch(addTask({ id: taskId, content: data }))
-    dispatch(addTaskIdInColumn({ id: 'column-1', taskId }))
+    dispatch(addTaskId(taskId))
   }
 
   useEffect(() => {
@@ -109,14 +110,14 @@ function App () {
   }, [])
 
   const handleOnAuxClickCopy = e => {
-    navigator.clipboard.writeText(document.getElementById(contextMenuId.taskId).textContent)
+    navigator.clipboard.writeText(document.getElementById(contextMenuId).textContent)
     e.target.offsetParent.style.display = 'none'
-    dispatch(setContextMenuId({ columnId: '', taskId: '' }))
+    dispatch(setContextMenuId(''))
   }
   const handleOnAuxClickCut = e => {
     e.target.offsetParent.style.display = 'none'
-    dispatch(setContextMenuId({ columnId: '', taskId: '' }))
-    dispatch(removeTask(contextMenuId.taskId))
+    dispatch(setContextMenuId(''))
+    dispatch(removeTask(contextMenuId))
     dispatch(removeTaskId(contextMenuId))
   }
   const handleOnAuxClickPaste = async e => {
@@ -124,28 +125,65 @@ function App () {
     await addTaskFunc()
   }
 
+  const handleOnAuxClick = e => {
+    e.preventDefault()
+    if (e.target.id.startsWith('task-')) {
+      return
+    }
+    dispatch(setContextMenuId(''))
+
+    const contextMenu = document.getElementById('context-menu')
+
+    contextMenu.style.display = 'flex'
+    contextMenu.style.top = `${e.clientY}px`
+    contextMenu.style.left = `${e.clientX}px`
+  }
+  const handleOnTouchStart = e => {
+    const contextMenu = document.getElementById('context-menu')
+
+    contextMenu.style.display = 'none'
+    contextMenu.style.top = `${e.touches[0].clientY}px`
+    contextMenu.style.left = `${e.touches[0].clientX}px`
+  }
+  const handleOnTouchEnd = e => {
+    if (moved.current) {
+      moved.current = false
+    } else if (e.target.classList.contains('column')) {
+      document.getElementById('context-menu').style.display = 'flex'
+      dispatch(setContextMenuId(''))
+    }
+  }
+
+  const appContainerHandleOnKeyUp = e => {
+    if (e.key === 'Control') {
+      control.current = false
+    }
+  }
+  const appContainerHandleOnKeyDown = async e => {
+    if (e.key === 'Control') {
+      control.current = true
+    }
+    if (e.key.toLowerCase() === 'v' && control.current && document.getElementById('task-creator') !== document.activeElement) {
+      await addTaskFunc()
+    }
+  }
+
   return (
     <AppContainer
       tabIndex='0'
-      onKeyUp={e => {
-        if (e.key === 'Control') {
-          control = false
-        }
-      }}
-      onKeyDown={async e => {
-        if (e.key === 'Control') {
-          control = true
-        }
-        if (e.key.toLowerCase() === 'v' && control) {
-          await addTaskFunc()
-        }
-      }}
+      onAuxClick={handleOnAuxClick}
+      onContextMenu={e => e.preventDefault()}
+      onTouchStart={handleOnTouchStart}
+      onTouchMove={() => { moved.current = true }}
+      onTouchEnd={handleOnTouchEnd}
+      onKeyUp={appContainerHandleOnKeyUp}
+      onKeyDown={appContainerHandleOnKeyDown}
     >
       <ContextMenu
         onContextMenu={e => e.preventDefault()}
         id='context-menu'
       >
-        {contextMenuId.taskId !== '' && (
+        {contextMenuId !== '' && (
           <>
             <Button
               className='context-menu-b'
@@ -161,14 +199,12 @@ function App () {
             </Button>
           </>
         )}
-        {contextMenuId.taskId === '' && (
-          <Button
-            className='context-menu-b'
-            onClick={handleOnAuxClickPaste}
-          >
-            Paste
-          </Button>
-        )}
+        <Button
+          className='context-menu-b'
+          onClick={handleOnAuxClickPaste}
+        >
+          Paste
+        </Button>
       </ContextMenu>
       <Board />
     </AppContainer>
