@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { addTask } from '../redux/reducers/tasksSlice'
 import { addTaskId } from '../redux/reducers/columnsSlice'
+import { setContextMenuOpen } from '../redux/reducers/contextMenuOpenSlice'
 
 const Container = styled.div`
   position: relative;
@@ -43,7 +44,7 @@ export default function TextArea () {
   const textAreaRef = useRef()
   const maxLength = 200
 
-  const keydown = e => {
+  const handleKeydown = e => {
     if (e.key === 'Enter') {
       e.preventDefault()
       if (textAreaRef.current.value.length < 1) {
@@ -58,6 +59,11 @@ export default function TextArea () {
     }
   }
 
+  const handleOnFocus = () => {
+    document.getElementById('context-menu').style.display = 'none'
+    dispatch(setContextMenuOpen(true))
+  }
+
   return (
     <Container>
       <Counter
@@ -70,8 +76,8 @@ export default function TextArea () {
         id='task-creator'
         ref={textAreaRef}
         maxLength={maxLength}
-        onKeyDown={keydown}
-        onFocus={() => { document.getElementById('context-menu').style.display = 'none' }}
+        onKeyDown={handleKeydown}
+        onFocus={handleOnFocus}
         placeholder='Enter task content here.&#10;Press enter to add.'
         onChange={() => setLimitCounter(textAreaRef.current.value.length)}
       />

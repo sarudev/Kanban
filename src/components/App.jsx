@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 import Board from './Board'
 import styled from 'styled-components'
 import { useSelector, useDispatch } from 'react-redux'
 import { setContextMenuId } from '../redux/reducers/contextMenuId'
 import { addTask, removeTask } from '../redux/reducers/tasksSlice'
 import { addTaskId, removeTaskId } from '../redux/reducers/columnsSlice'
+import { setContextMenuOpen } from '../redux/reducers/contextMenuOpenSlice'
 
 const AppContainer = styled.div`
   min-width: 100vw;
@@ -44,9 +45,11 @@ const Button = styled.div`
 function App () {
   const tasks = useSelector(state => state.tasks)
   const contextMenuId = useSelector(state => state.contextMenuId)
+  const contextMenuOpen = useSelector(state => state.contextMenuOpen)
   const dispatch = useDispatch()
-  const control = useRef(false)
-  const moved = useRef(false)
+  const contextMenuControl = useRef(false)
+  const contextMenuMoved = useRef(false)
+  const contextMenuRef = useRef()
 
   const addTaskFunc = async () => {
     const data = await navigator.clipboard.readText()
@@ -59,72 +62,32 @@ function App () {
     dispatch(addTaskId(taskId))
   }
 
-  useEffect(() => {
-    const clickFunc = e => {
-      const contextMenu = document.getElementById('context-menu')
-      const textArea = document.getElementById('task-creator')
-      const tasksIds = [...document.getElementsByClassName('task')].map(e => e.id)
-
-      if (e.touches) {
-        if (e.target.id !== textArea.id) {
-          textArea.blur()
-        } else {
-          return
-        }
-        if (e.target.classList.contains('context-menu-b')) {
-          return
-        }
-        e.preventDefault()
-        document.removeEventListener('touchend', clickFunc)
-        document.addEventListener('mousedown', clickFunc)
-        if (
-          e.target.id !== contextMenu.id &&
-          !e.target.classList.contains('context-menu-b') &&
-          (
-            !tasksIds.includes(e.target.id || e.target.offsetParent?.id) &&
-            !e.target.classList.contains('column')
-          )
-        ) {
-          contextMenu.style.display = 'none'
-          dispatch(setContextMenuId(''))
-        }
-      } else {
-        if (e.target.id !== contextMenu.id && !e.target.classList.contains('context-menu-b')) {
-          contextMenu.style.display = 'none'
-          dispatch(setContextMenuId(''))
-        }
-      }
-    }
-    const touchFunc = e => {
-      document.removeEventListener('mousedown', clickFunc)
-      document.addEventListener('touchend', clickFunc)
-    }
-
-    document.addEventListener('mousedown', clickFunc)
-    document.addEventListener('touchstart', touchFunc)
-    return () => {
-      document.removeEventListener('mousedown', clickFunc)
-      document.removeEventListener('touchstart', touchFunc)
-      document.removeEventListener('touchend', clickFunc)
-    }
-  }, [])
-
   const handleOnAuxClickCopy = e => {
     navigator.clipboard.writeText(document.getElementById(contextMenuId).textContent)
     e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuOpen(false))
     dispatch(setContextMenuId(''))
   }
   const handleOnAuxClickCut = e => {
     e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuOpen(false))
     dispatch(setContextMenuId(''))
     dispatch(removeTask(contextMenuId))
     dispatch(removeTaskId(contextMenuId))
   }
   const handleOnAuxClickPaste = async e => {
     e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuOpen(false))
     await addTaskFunc()
   }
 
+  const handleOnClick = e => {
+    if (contextMenuOpen && !e.target.id.startsWith('context-menu') && e.target.id !== 'task-creator') {
+      contextMenuRef.current.style.display = 'none'
+      dispatch(setContextMenuOpen(false))
+      dispatch(setContextMenuId(''))
+    }
+  }
   const handleOnAuxClick = e => {
     e.preventDefault()
     if (e.target.id.startsWith('task-')) {
@@ -132,38 +95,47 @@ function App () {
     }
     dispatch(setContextMenuId(''))
 
-    const contextMenu = document.getElementById('context-menu')
-
-    contextMenu.style.display = 'flex'
-    contextMenu.style.top = `${e.clientY}px`
-    contextMenu.style.left = `${e.clientX}px`
+    contextMenuRef.current.style.display = 'flex'
+    dispatch(setContextMenuOpen(true))
+    contextMenuRef.current.style.top = `${e.clientY}px`
+    contextMenuRef.current.style.left = `${e.clientX}px`
   }
-  const handleOnTouchStart = e => {
-    const contextMenu = document.getElementById('context-menu')
 
-    contextMenu.style.display = 'none'
-    contextMenu.style.top = `${e.touches[0].clientY}px`
-    contextMenu.style.left = `${e.touches[0].clientX}px`
+  const handleOnTouchStart = e => {
+    if (!e.target.id.startsWith('context-menu')) {
+      if (contextMenuOpen) {
+        contextMenuRef.current.style.display = 'none'
+      }
+      contextMenuRef.current.style.top = `${e.touches[0].clientY}px`
+      contextMenuRef.current.style.left = `${e.touches[0].clientX}px`
+    }
+  }
+  const handleOnTouchMove = e => {
+    contextMenuMoved.current = true
+    if (!e.target.id.startsWith('context-menu')) {
+      dispatch(setContextMenuOpen(false))
+    }
   }
   const handleOnTouchEnd = e => {
-    if (moved.current) {
-      moved.current = false
-    } else if (e.target.classList.contains('column')) {
-      document.getElementById('context-menu').style.display = 'flex'
-      dispatch(setContextMenuId(''))
+    if (contextMenuMoved.current) {
+      contextMenuMoved.current = false
+    } else if (!contextMenuOpen && e.target.id !== 'task-creator') {
+      contextMenuRef.current.style.display = 'flex'
+      dispatch(setContextMenuOpen(true))
+      dispatch(setContextMenuId(e.target.id.startsWith('task-') && e.target.id !== 'task-creator' ? e.target.id : ''))
     }
   }
 
-  const appContainerHandleOnKeyUp = e => {
+  const handleOnKeyUp = e => {
     if (e.key === 'Control') {
-      control.current = false
+      contextMenuControl.current = false
     }
   }
-  const appContainerHandleOnKeyDown = async e => {
+  const handleOnKeyDown = async e => {
     if (e.key === 'Control') {
-      control.current = true
+      contextMenuControl.current = true
     }
-    if (e.key.toLowerCase() === 'v' && control.current && document.getElementById('task-creator') !== document.activeElement) {
+    if (e.key.toLowerCase() === 'v' && contextMenuControl.current && document.getElementById('task-creator') !== document.activeElement) {
       await addTaskFunc()
     }
   }
@@ -174,25 +146,29 @@ function App () {
       onAuxClick={handleOnAuxClick}
       onContextMenu={e => e.preventDefault()}
       onTouchStart={handleOnTouchStart}
-      onTouchMove={() => { moved.current = true }}
+      onTouchMove={handleOnTouchMove}
       onTouchEnd={handleOnTouchEnd}
-      onKeyUp={appContainerHandleOnKeyUp}
-      onKeyDown={appContainerHandleOnKeyDown}
+      onKeyUp={handleOnKeyUp}
+      onKeyDown={handleOnKeyDown}
+      onClick={handleOnClick}
     >
       <ContextMenu
+        ref={contextMenuRef}
         onContextMenu={e => e.preventDefault()}
         id='context-menu'
       >
         {contextMenuId !== '' && (
           <>
             <Button
-              className='context-menu-b'
+              className='context-menu-btn'
+              id='context-menu-btn-copy'
               onClick={handleOnAuxClickCopy}
             >
               Copy
             </Button>
             <Button
-              className='context-menu-b'
+              className='context-menu-btn'
+              id='context-menu-btn-cut'
               onClick={handleOnAuxClickCut}
             >
               Cut
@@ -200,7 +176,8 @@ function App () {
           </>
         )}
         <Button
-          className='context-menu-b'
+          className='context-menu-btn'
+          id='context-menu-btn-paste'
           onClick={handleOnAuxClickPaste}
         >
           Paste

@@ -3,12 +3,14 @@ import contextMenuId from './reducers/contextMenuId'
 import tasks from './reducers/tasksSlice'
 import columns from './reducers/columnsSlice'
 import isDragging from './reducers/isDraggingSlice'
+import contextMenuOpen from './reducers/contextMenuOpenSlice'
 
 export const store = configureStore({
   reducer: {
     contextMenuId,
     tasks,
     columns,
-    isDragging
+    isDragging,
+    contextMenuOpen
   }
 })
