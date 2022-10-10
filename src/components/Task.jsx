@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Draggable } from 'react-beautiful-dnd'
 import '../css/App.css'
-import { setContextMenuId } from '../redux/reducers/contextMenuId'
-import { useDispatch } from 'react-redux'
-import { setContextMenuOpen } from '../redux/reducers/contextMenuOpenSlice'
+import { useSelector, useDispatch } from 'react-redux'
+
+import { addTask, removeTask } from '../redux/reducers/tasksSlice'
+import { setTaskInputId } from '../redux/reducers/taskInputIdSlice'
+import { removeTaskId } from '../redux/reducers/columnsSlice'
 
 const Container = styled.div`
   position: relative;
@@ -17,20 +19,36 @@ const Container = styled.div`
   text-align: center;
   word-wrap: break-word;
 `
+const Input = styled.input`
+  width: 100%;
+  height: 30px;
+  font-size: 20px;
+  display: none;
+`
+const TaskTextContainer = styled.div`
+`
 
 export default function Task ({ task, index, isDragDisabled }) {
+  const [text, setText] = useState(task.content)
+  const taskInputId = useSelector(state => state.taskInputId)
   const dispatch = useDispatch()
 
-  const handleOnAuxClick = e => {
-    e.preventDefault()
-    dispatch(setContextMenuId(task.id))
+  const handleOnKeyDown = e => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (text.length === 0) {
+        dispatch(removeTask(task.id))
+        dispatch(removeTaskId(task.id))
+      } else {
+        dispatch(addTask({ id: task.id, content: text }))
+      }
+      e.target.style.display = 'none'
+      document.getElementById('content-' + task.id).style.display = 'inherit  '
+    }
+  }
 
-    const contextMenu = document.getElementById('context-menu')
-
-    contextMenu.style.display = 'flex'
-    dispatch(setContextMenuOpen(true))
-    contextMenu.style.top = `${e.clientY}px`
-    contextMenu.style.left = `${e.clientX}px`
+  const handleOnChange = e => {
+    setText(e.target.value)
   }
 
   return (
@@ -48,10 +66,19 @@ export default function Task ({ task, index, isDragDisabled }) {
           isDragDisabled={isDragDisabled}
           id={task.id}
           className='task'
-          onAuxClick={handleOnAuxClick}
-          onContextMenu={e => e.preventDefault()}
         >
-          {task.content}
+          <Input
+            id={'input-' + task.id}
+            className='input-tasks'
+            value={text}
+            onKeyDown={handleOnKeyDown}
+            onChange={handleOnChange}
+          />
+          <TaskTextContainer
+            id={'content-' + task.id}
+          >
+            {task.content}
+          </TaskTextContainer>
         </Container>
       )}
     </Draggable>

@@ -73,7 +73,7 @@ export default function TextArea () {
         {limitCounter}/{maxLength}
       </Counter>
       <Text
-        id='task-creator'
+        id='area-task-creator'
         ref={textAreaRef}
         maxLength={maxLength}
         onKeyDown={handleKeydown}

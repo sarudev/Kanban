@@ -6,6 +6,7 @@ import { setContextMenuId } from '../redux/reducers/contextMenuId'
 import { addTask, removeTask } from '../redux/reducers/tasksSlice'
 import { addTaskId, removeTaskId } from '../redux/reducers/columnsSlice'
 import { setContextMenuOpen } from '../redux/reducers/contextMenuOpenSlice'
+import { setTaskInputId } from '../redux/reducers/taskInputIdSlice'
 
 const AppContainer = styled.div`
   min-width: 100vw;
@@ -71,10 +72,18 @@ function App () {
   const handleEdit = e => {
     e.target.offsetParent.style.display = 'none'
     dispatch(setContextMenuOpen(false))
-
-    const data = document.getElementById(contextMenuId).innerText
-
-    console.log(data)
+    ;[...document.getElementsByClassName('input-tasks')].forEach(e => {
+      e.style.display = 'none'
+    })
+    const input = document.getElementById('input-' + contextMenuId)
+    if (input != null) {
+      input.style.display = 'inherit'
+    }
+    input.focus()
+    const taskContent = document.getElementById('content-' + contextMenuId)
+    if (taskContent != null) {
+      taskContent.style.display = 'none'
+    }
   }
   const handleCut = e => {
     e.target.offsetParent.style.display = 'none'
@@ -82,6 +91,7 @@ function App () {
 
     dispatch(removeTask(contextMenuId))
     dispatch(removeTaskId(contextMenuId))
+    dispatch(setTaskInputId(''))
   }
   const handlePaste = async e => {
     e.target.offsetParent.style.display = 'none'
@@ -91,29 +101,37 @@ function App () {
   }
 
   const handleOnClick = e => {
-    if (contextMenuOpen && !e.target.id.startsWith('context-menu') && e.target.id !== 'task-creator') {
-      if (e.target.id.startsWith('task-')) {
-        contextMenuRef.current.style.display = 'inherit'
-        dispatch(setContextMenuOpen(true))
-        dispatch(setContextMenuId(e.target.id.startsWith('task-') && e.target.id !== 'task-creator' ? e.target.id : ''))
-      } else {
-        (contextMenuRef.current.style.display = 'none')
-        dispatch(setContextMenuOpen(false))
-        dispatch(setContextMenuId(''))
-      }
+    if (
+      contextMenuOpen &&
+        !e.target.id.startsWith('context-menu') &&
+        e.target.id !== 'area-task-creator'
+    ) {
+      dispatch(setContextMenuId(e.target.id.startsWith('task-') || e.target.id.startsWith('content-task-') ? e.target.id.split('content-')[1] : ''))
+
+      contextMenuRef.current.style.display = 'none'
+      dispatch(setContextMenuOpen(false))
+
+      contextMenuRef.current.style.top = `${e.clientY}px`
+      contextMenuRef.current.style.left = `${e.clientX}px`
     }
   }
   const handleOnAuxClick = e => {
-    e.preventDefault()
-    if (e.target.id.startsWith('task-')) {
-      return
-    }
-    dispatch(setContextMenuId(''))
+    if (!e.target.id.startsWith('input-task-')) {
+      e.preventDefault()
+      dispatch(setContextMenuId(e.target.id.startsWith('task-') || e.target.id.startsWith('content-task-') ? e.target.id.split('content-')[1] : ''))
 
-    contextMenuRef.current.style.display = 'flex'
-    dispatch(setContextMenuOpen(true))
-    contextMenuRef.current.style.top = `${e.clientY}px`
-    contextMenuRef.current.style.left = `${e.clientX}px`
+      contextMenuRef.current.style.display = 'flex'
+      dispatch(setContextMenuOpen(true))
+
+      contextMenuRef.current.style.top = `${e.clientY}px`
+      contextMenuRef.current.style.left = `${e.clientX}px`
+    } else if (e.target.id.startsWith('input-task-')) {
+      contextMenuRef.current.style.display = 'none'
+      dispatch(setContextMenuOpen(false))
+
+      contextMenuRef.current.style.top = `${e.clientY}px`
+      contextMenuRef.current.style.left = `${e.clientX}px`
+    }
   }
 
   const handleOnTouchStart = e => {
@@ -134,10 +152,10 @@ function App () {
   const handleOnTouchEnd = e => {
     if (contextMenuMoved.current) {
       contextMenuMoved.current = false
-    } else if (!contextMenuOpen && e.target.id !== 'task-creator') {
+    } else if (!contextMenuOpen && e.target.id !== 'area-task-creator' && !e.target.id.startsWith('input-task-')) {
       contextMenuRef.current.style.display = 'flex'
       dispatch(setContextMenuOpen(true))
-      dispatch(setContextMenuId(e.target.id.startsWith('task-') && e.target.id !== 'task-creator' ? e.target.id : ''))
+      dispatch(setContextMenuId(e.target.id.startsWith('task-') || e.target.id.startsWith('content-task-') ? e.target.id.split('content-')[1] : ''))
     }
   }
 
@@ -150,7 +168,7 @@ function App () {
     if (e.key === 'Control') {
       contextMenuControl.current = true
     }
-    if (e.key.toLowerCase() === 'v' && contextMenuControl.current && document.getElementById('task-creator') !== document.activeElement) {
+    if (e.key.toLowerCase() === 'v' && contextMenuControl.current && document.getElementById('area-task-creator') !== document.activeElement) {
       await addTaskFunc()
     }
   }
