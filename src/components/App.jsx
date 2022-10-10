@@ -143,6 +143,7 @@ function App () {
   return (
     <AppContainer
       tabIndex='0'
+      onClick={handleOnClick}
       onAuxClick={handleOnAuxClick}
       onContextMenu={e => e.preventDefault()}
       onTouchStart={handleOnTouchStart}
@@ -150,7 +151,6 @@ function App () {
       onTouchEnd={handleOnTouchEnd}
       onKeyUp={handleOnKeyUp}
       onKeyDown={handleOnKeyDown}
-      onClick={handleOnClick}
     >
       <ContextMenu
         ref={contextMenuRef}
