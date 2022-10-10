@@ -7,6 +7,9 @@
   --limit: #fbfff169;
   --outline: #FBFFF1;
   --focus-outline: #8758ff;
+  --btn-height: 30px;
+  --btn-width: 125px;
+  --btn-pad-mar: 5px;
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;

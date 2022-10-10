@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Draggable } from 'react-beautiful-dnd'
 import '../css/App.css'
+import { setContextMenuId } from '../redux/reducers/contextMenuId'
+import { useDispatch } from 'react-redux'
 
 const Container = styled.div`
   position: relative;
@@ -11,23 +13,21 @@ const Container = styled.div`
   padding: 8px;
   margin-bottom: 8px;
   background-color: var(--bg-color);
-  display: flex;
-`
-const TextContent = styled.div`
-  position: relative;
-  width: 100%;
-  margin-left: 0px;
   text-align: center;
   word-wrap: break-word;
 `
 
-export default function Task ({ task, index, isDragDisabled, handleContextMenu }) {
+export default function Task ({ task, index, isDragDisabled }) {
   let moved = false
+  const dispatch = useDispatch()
 
   const onAuxClick = e => {
     e.preventDefault()
+    dispatch(setContextMenuId(task.id))
+
     const contextMenu = document.getElementById('context-menu')
-    contextMenu.hidden = false
+
+    contextMenu.style.display = 'flex'
     contextMenu.style.top = `${e.clientY}px`
     contextMenu.style.left = `${e.clientX}px`
   }
@@ -44,9 +44,12 @@ export default function Task ({ task, index, isDragDisabled, handleContextMenu }
   const onTouchMove = () => { moved = true }
 
   const onTouchEnd = () => {
-    moved
-      ? moved = false
-      : document.getElementById('context-menu').hidden = false
+    if (moved) {
+      moved = false
+    } else {
+      document.getElementById('context-menu').style.display = 'flex'
+      dispatch(setContextMenuId(task.id))
+    }
   }
 
   return (
@@ -70,9 +73,7 @@ export default function Task ({ task, index, isDragDisabled, handleContextMenu }
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <TextContent>
-            {task.content}
-          </TextContent>
+          {task.content}
         </Container>
       )}
     </Draggable>
@@ -81,6 +82,5 @@ export default function Task ({ task, index, isDragDisabled, handleContextMenu }
 Task.propTypes = {
   task: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  isDragDisabled: PropTypes.bool.isRequired,
-  handleContextMenu: PropTypes.func
+  isDragDisabled: PropTypes.bool.isRequired
 }

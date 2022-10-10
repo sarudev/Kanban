@@ -1,6 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
+import React, { useRef, useState } from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import { addTask } from '../redux/reducers/tasksSlice'
+import { addTaskIdInColumn } from '../redux/reducers/columnsSlice'
 
 const Container = styled.div`
   position: relative;
@@ -33,14 +35,13 @@ const Text = styled.textarea`
   }
 `
 
-export default function TextArea ({ addTask }) {
+export default function TextArea () {
+  const tasks = useSelector(state => state.tasks)
+  const dispatch = useDispatch()
+
   const [limitCounter, setLimitCounter] = useState(0)
   const textAreaRef = useRef()
-  const maxLength = 150
-
-  useEffect(() => {
-    // if (textAreaRef.current.value.length === )
-  }, [limitCounter])
+  const maxLength = 200
 
   const keydown = e => {
     if (e.key === 'Enter') {
@@ -48,23 +49,32 @@ export default function TextArea ({ addTask }) {
       if (textAreaRef.current.value.length < 1) {
         return
       }
-      addTask(textAreaRef.current.value)
-      textAreaRef.current.value = ''
-      setLimiter()
-    }
-  }
 
-  const setLimiter = () => {
-    setLimitCounter(textAreaRef.current.value.length)
+      const taskId = 'task-' + (+tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1)
+      dispatch(addTask({ id: taskId, content: textAreaRef.current.value }))
+      dispatch(addTaskIdInColumn({ id: 'column-1', taskId }))
+      textAreaRef.current.value = ''
+      setLimitCounter(textAreaRef.current.value.length)
+    }
   }
 
   return (
     <Container>
-      <Counter value={limitCounter} maxLength={maxLength}>{limitCounter}/{maxLength}</Counter>
-      <Text id='task-creator' ref={textAreaRef} maxLength={maxLength} onKeyDown={keydown} placeholder='Enter task content here.&#10;Press enter to add.' onChange={setLimiter} />
+      <Counter
+        value={limitCounter}
+        maxLength={maxLength}
+      >
+        {limitCounter}/{maxLength}
+      </Counter>
+      <Text
+        id='task-creator'
+        ref={textAreaRef}
+        maxLength={maxLength}
+        onKeyDown={keydown}
+        onFocus={() => { document.getElementById('context-menu').style.display = 'none' }}
+        placeholder='Enter task content here.&#10;Press enter to add.'
+        onChange={() => setLimitCounter(textAreaRef.current.value.length)}
+      />
     </Container>
   )
-}
-TextArea.propTypes = {
-  addTask: PropTypes.func.isRequired
 }

@@ -3,6 +3,8 @@ import Task from './Task'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { Droppable } from 'react-beautiful-dnd'
+import { useSelector, useDispatch } from 'react-redux'
+import { setContextMenuId } from '../redux/reducers/contextMenuId'
 
 const Container = styled.div`
   margin: 8px;
@@ -43,10 +45,13 @@ function observer (entries, where) {
     : entries[0].target.offsetParent.style[where] = '2px var(--focus-outline) solid'
 }
 
-export default function Column ({ columnId, title, tasks, isDragging, handleContextMenu }) {
+export default function Column ({ columnId, title, tasks }) {
+  const isDragging = useSelector(state => state.isDragging)
+  const dispatch = useDispatch()
+
   useEffect(() => {
     if (tasks.length > 0) {
-      ;[...document.getElementById(columnId).childNodes[1].childNodes].forEach(el => {
+      ;[...document.getElementById('container-' + columnId).childNodes[1].childNodes].forEach(el => {
         observerTop.unobserve(el)
         observerDown.unobserve(el)
       })
@@ -55,19 +60,64 @@ export default function Column ({ columnId, title, tasks, isDragging, handleCont
       observerDown.observe(document.getElementById(tasks.at(-1).id))
     }
   })
+  let moved = false
+
+  const handleOnAuxClick = e => {
+    e.preventDefault()
+    if (e.target.id.startsWith('task-')) {
+      return
+    }
+    dispatch(setContextMenuId(''))
+
+    const contextMenu = document.getElementById('context-menu')
+
+    contextMenu.style.display = 'flex'
+    contextMenu.style.top = `${e.clientY}px`
+    contextMenu.style.left = `${e.clientX}px`
+  }
+
+  const handleOnTouchStart = e => {
+    const contextMenu = document.getElementById('context-menu')
+
+    contextMenu.style.display = 'none'
+    contextMenu.style.top = `${e.touches[0].clientY}px`
+    contextMenu.style.left = `${e.touches[0].clientX}px`
+  }
+
+  const handleOnTouchEnd = e => {
+    if (moved) {
+      moved = false
+    } else if (e.target.classList.contains('column')) {
+      document.getElementById('context-menu').style.display = 'flex'
+      dispatch(setContextMenuId(''))
+    }
+  }
 
   return (
-    <Container id={columnId}>
+    <Container id={'container-' + columnId}>
       <Title>{title}</Title>
       <Droppable droppableId={columnId}>
         {(provided, snapshot) => (
           <TaskList
             {...provided.droppableProps}
+            className='column'
+            id={columnId}
             ref={provided.innerRef}
             isDraggingOver={snapshot.isDraggingOver}
+            onAuxClick={handleOnAuxClick}
+            onContextMenu={e => e.preventDefault()}
+            onTouchStart={handleOnTouchStart}
+            onTouchMove={() => { moved = true }}
+            onTouchEnd={handleOnTouchEnd}
           >
             {tasks.map((task, index) => (
-              <Task key={task.id} task={task} index={index} isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id} handleContextMenu={handleContextMenu} />
+              <Task
+                key={task.id}
+                task={task}
+                index={index}
+                tasks={tasks}
+                isDragDisabled={isDragging && snapshot.draggingFromThisWith !== task.id}
+              />
             ))}
             {provided.placeholder}
           </TaskList>
@@ -80,7 +130,5 @@ export default function Column ({ columnId, title, tasks, isDragging, handleCont
 Column.propTypes = {
   title: PropTypes.string.isRequired,
   columnId: PropTypes.string.isRequired,
-  tasks: PropTypes.array.isRequired,
-  isDragging: PropTypes.bool.isRequired,
-  handleContextMenu: PropTypes.func
+  tasks: PropTypes.array.isRequired
 }
