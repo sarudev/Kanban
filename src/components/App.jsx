@@ -53,7 +53,7 @@ function App () {
       return
     }
 
-    const taskId = 'task-' + (+tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1)
+    const taskId = 'task-' + (+Object.keys(tasks).at(-1)?.split('-')?.[1] + 1 || 1)
     dispatch(addTask({ id: taskId, content: data }))
     dispatch(addTaskIdInColumn({ id: 'column-1', taskId }))
   }
@@ -161,7 +161,7 @@ function App () {
             </Button>
           </>
         )}
-        {contextMenuId.taskId === '' && contextMenuId.columnId !== '' && (
+        {contextMenuId.taskId === '' && (
           <Button
             className='context-menu-b'
             onClick={handleOnAuxClickPaste}
