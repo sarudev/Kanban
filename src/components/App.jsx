@@ -1,9 +1,15 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import Board from './Board'
 import styled from 'styled-components'
 import { useSelector, useDispatch } from 'react-redux'
 import { setContextMenuId } from '../redux/reducers/contextMenuId'
+import { addTask, removeTask } from '../redux/reducers/tasksSlice'
+import { addTaskIdInColumn, removeTaskId } from '../redux/reducers/columnsSlice'
 
+const AppContainer = styled.div`
+  min-width: 100vw;
+  min-height: 100vh;
+`
 const ContextMenu = styled.div`
   position: absolute;
   background-color: #202020;
@@ -36,8 +42,21 @@ const Button = styled.div`
 `
 
 function App () {
+  const tasks = useSelector(state => state.tasks)
   const contextMenuId = useSelector(state => state.contextMenuId)
   const dispatch = useDispatch()
+  let control = useRef(false)
+
+  const addTaskFunc = async () => {
+    const data = await navigator.clipboard.readText()
+    if (data.length < 1 || data.length > 200) {
+      return
+    }
+
+    const taskId = 'task-' + (+tasks[Object.keys(tasks).at(-1)]?.id?.split('-')?.[1] + 1 || 1)
+    dispatch(addTask({ id: taskId, content: data }))
+    dispatch(addTaskIdInColumn({ id: 'column-1', taskId }))
+  }
 
   useEffect(() => {
     const clickFunc = e => {
@@ -57,7 +76,6 @@ function App () {
         e.preventDefault()
         document.removeEventListener('touchend', clickFunc)
         document.addEventListener('mousedown', clickFunc)
-        console.log()
         if (
           e.target.id !== contextMenu.id &&
           !e.target.classList.contains('context-menu-b') &&
@@ -80,69 +98,80 @@ function App () {
       document.removeEventListener('mousedown', clickFunc)
       document.addEventListener('touchend', clickFunc)
     }
-    // const keydownFunc = e => {
-    //   console.log(e.key)
-    //   if (e.key === 'Alt') {
-    //     document.getElementById('context-menu').style.display = 'none'
-    //   }
-    // }
 
     document.addEventListener('mousedown', clickFunc)
     document.addEventListener('touchstart', touchFunc)
-    // document.addEventListener('keypress', keydownFunc)
     return () => {
       document.removeEventListener('mousedown', clickFunc)
       document.removeEventListener('touchstart', touchFunc)
       document.removeEventListener('touchend', clickFunc)
-      // document.removeEventListener('keypress', keydownFunc)
     }
   }, [])
 
+  const handleOnAuxClickCopy = e => {
+    navigator.clipboard.writeText(document.getElementById(contextMenuId.taskId).textContent)
+    e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuId({ columnId: '', taskId: '' }))
+  }
+  const handleOnAuxClickCut = e => {
+    e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuId({ columnId: '', taskId: '' }))
+    dispatch(removeTask(contextMenuId.taskId))
+    dispatch(removeTaskId(contextMenuId))
+  }
+  const handleOnAuxClickPaste = async e => {
+    e.target.offsetParent.style.display = 'none'
+    await addTaskFunc()
+  }
+
   return (
-    <>
+    <AppContainer
+      tabIndex='0'
+      onKeyUp={e => {
+        if (e.key === 'Control') {
+          control = false
+        }
+      }}
+      onKeyDown={async e => {
+        if (e.key === 'Control') {
+          control = true
+        }
+        if (e.key.toLowerCase() === 'v' && control) {
+          await addTaskFunc()
+        }
+      }}
+    >
       <ContextMenu
         onContextMenu={e => e.preventDefault()}
         id='context-menu'
       >
-        {contextMenuId !== '' && (
-          <Button
-            className='context-menu-b'
-            onClick={e => {
-              navigator.clipboard.writeText(document.getElementById(contextMenuId).textContent)
-              e.target.offsetParent.style.display = 'none'
-              dispatch(setContextMenuId(''))
-              console.log('coppied')
-            }}
-          >
-            Copiar
-          </Button>
+        {contextMenuId.taskId !== '' && (
+          <>
+            <Button
+              className='context-menu-b'
+              onClick={handleOnAuxClickCopy}
+            >
+              Copy
+            </Button>
+            <Button
+              className='context-menu-b'
+              onClick={handleOnAuxClickCut}
+            >
+              Cut
+            </Button>
+          </>
         )}
-        {contextMenuId === '' && (
+        {contextMenuId.taskId === '' && contextMenuId.columnId !== '' && (
           <Button
             className='context-menu-b'
-            onClick={e => {
-              e.target.offsetParent.style.display = 'none'
-              console.log('pasted')
-            }}
+            onClick={handleOnAuxClickPaste}
           >
-            Pegar
-          </Button>
-        )}
-        {contextMenuId !== '' && (
-          <Button
-            className='context-menu-b'
-            onClick={e => {
-              e.target.offsetParent.style.display = 'none'
-              dispatch(setContextMenuId(''))
-              console.log('cutted')
-            }}
-          >
-            Cortar
+            Paste
           </Button>
         )}
       </ContextMenu>
       <Board />
-    </>
+    </AppContainer>
   )
 }
 

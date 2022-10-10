@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = ''
+const initialState = {
+  columnId: '',
+  taskId: ''
+}
 
 export const taskIdContextMenuSlice = createSlice({
   name: 'taskIdContextMenu',

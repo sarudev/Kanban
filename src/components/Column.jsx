@@ -67,7 +67,7 @@ export default function Column ({ columnId, title, tasks }) {
     if (e.target.id.startsWith('task-')) {
       return
     }
-    dispatch(setContextMenuId(''))
+    dispatch(setContextMenuId({ columnId, taskId: '' }))
 
     const contextMenu = document.getElementById('context-menu')
 
@@ -89,7 +89,7 @@ export default function Column ({ columnId, title, tasks }) {
       moved = false
     } else if (e.target.classList.contains('column')) {
       document.getElementById('context-menu').style.display = 'flex'
-      dispatch(setContextMenuId(''))
+      dispatch(setContextMenuId({ columnId, taskId: '' }))
     }
   }
 
