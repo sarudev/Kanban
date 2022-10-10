@@ -62,30 +62,45 @@ function App () {
     dispatch(addTaskId(taskId))
   }
 
-  const handleOnAuxClickCopy = e => {
+  const handleCopy = e => {
+    e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuOpen(false))
+
     navigator.clipboard.writeText(document.getElementById(contextMenuId).textContent)
-    e.target.offsetParent.style.display = 'none'
-    dispatch(setContextMenuOpen(false))
-    dispatch(setContextMenuId(''))
   }
-  const handleOnAuxClickCut = e => {
+  const handleEdit = e => {
     e.target.offsetParent.style.display = 'none'
     dispatch(setContextMenuOpen(false))
-    dispatch(setContextMenuId(''))
+
+    const data = document.getElementById(contextMenuId).innerText
+
+    console.log(data)
+  }
+  const handleCut = e => {
+    e.target.offsetParent.style.display = 'none'
+    dispatch(setContextMenuOpen(false))
+
     dispatch(removeTask(contextMenuId))
     dispatch(removeTaskId(contextMenuId))
   }
-  const handleOnAuxClickPaste = async e => {
+  const handlePaste = async e => {
     e.target.offsetParent.style.display = 'none'
     dispatch(setContextMenuOpen(false))
+
     await addTaskFunc()
   }
 
   const handleOnClick = e => {
     if (contextMenuOpen && !e.target.id.startsWith('context-menu') && e.target.id !== 'task-creator') {
-      contextMenuRef.current.style.display = 'none'
-      dispatch(setContextMenuOpen(false))
-      dispatch(setContextMenuId(''))
+      if (e.target.id.startsWith('task-')) {
+        contextMenuRef.current.style.display = 'inherit'
+        dispatch(setContextMenuOpen(true))
+        dispatch(setContextMenuId(e.target.id.startsWith('task-') && e.target.id !== 'task-creator' ? e.target.id : ''))
+      } else {
+        (contextMenuRef.current.style.display = 'none')
+        dispatch(setContextMenuOpen(false))
+        dispatch(setContextMenuId(''))
+      }
     }
   }
   const handleOnAuxClick = e => {
@@ -162,14 +177,21 @@ function App () {
             <Button
               className='context-menu-btn'
               id='context-menu-btn-copy'
-              onClick={handleOnAuxClickCopy}
+              onClick={handleCopy}
             >
               Copy
             </Button>
             <Button
               className='context-menu-btn'
+              id='context-menu-btn-edit'
+              onClick={handleEdit}
+            >
+              Edit
+            </Button>
+            <Button
+              className='context-menu-btn'
               id='context-menu-btn-cut'
-              onClick={handleOnAuxClickCut}
+              onClick={handleCut}
             >
               Cut
             </Button>
@@ -178,7 +200,7 @@ function App () {
         <Button
           className='context-menu-btn'
           id='context-menu-btn-paste'
-          onClick={handleOnAuxClickPaste}
+          onClick={handlePaste}
         >
           Paste
         </Button>
